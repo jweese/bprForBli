@@ -1,27 +1,43 @@
 import tensorflow.python.platform
 import math
 import numpy as np
+import random
 import tensorflow as tf
 
 
 # Global variables.
 BATCH_SIZE = 100  # The number of training examples to use per training step.
 
-tf.app.flags.DEFINE_string('traininput', None,
-                           'File containing the training data (labels & features).')
-tf.app.flags.DEFINE_string('trainoutput', None,
-                           'File containing the test data (labels & features).')
-tf.app.flags.DEFINE_string('testinput', None,
-                           'File containing the training data (labels & features).')
-tf.app.flags.DEFINE_string('testoutput', None,
-                           'File containing the test data (labels & features).')
-tf.app.flags.DEFINE_string('project', None,
-                           'File containing the test data (labels & features).')
-tf.app.flags.DEFINE_integer('num_epochs', 1,
-                            'Number of passes over the training data.')
-tf.app.flags.DEFINE_integer('num_hidden', 1,
-                            'Number of nodes in the hidden layer.')
-tf.app.flags.DEFINE_boolean('verbose', False, 'Produce verbose output.')
+tf.app.flags.DEFINE_string(
+    'english',
+    None,
+    'English language vectors (test and train)',
+)
+tf.app.flags.DEFINE_string(
+    'foreign',
+    None,
+    'foreign language vectors (test and train)',
+)
+tf.app.flags.DEFINE_string(
+    'project',
+    None,
+    'foreign--english projection matrix',
+)
+tf.app.flags.DEFINE_integer(
+    'num_epochs',
+    1,
+    'Number of passes over the training data.',
+)
+tf.app.flags.DEFINE_integer(
+    'num_hidden',
+    1,
+    'Number of nodes in the hidden layer.',
+)
+tf.app.flags.DEFINE_boolean(
+    'verbose',
+    False,
+    'Produce verbose output.',
+)
 FLAGS = tf.app.flags.FLAGS
 
 def readVectors(filename):
@@ -31,20 +47,30 @@ def readVectors(filename):
         vectors.append(map(float, row))
     return vectors
 
+
+def splitTrainAndTest(english, foreign):
+    assert(len(english) == len(foreign))
+    testSize = 0.1
+    testLen = int(len(english) * testSize)
+    corpus = zip(english, foreign)
+    random.shuffle(corpus)
+    train = corpus[testLen:]
+    test = corpus[:testLen]
+    return (
+        [f for (e,f) in train],
+        [e for (e,f) in train],
+        [f for (e,f) in test],
+        [e for (e,f) in test],
+    )
+
+
 # Extract numpy representations of the labels and features given rows consisting of:
 #   label, feat_0, feat_1, ..., feat_n
 def extract_data():
-    traininputfile = FLAGS.traininput
-    trainoutputfile = FLAGS.trainoutput
-    testinputfile = FLAGS.testinput
-    testoutputfile = FLAGS.testoutput
-    projectfile = FLAGS.project
-
-    labels = readVectors(trainoutputfile)
-    fvecs = readVectors(traininputfile)
-    testlabels = readVectors(testoutputfile)
-    testfvecs = readVectors(testinputfile)
-    project = readVectors(projectFile)
+    english = readVectors(FLAGS.english)
+    foreign = readVectors(FLAGS.foreign)
+    labels, fvecs, testlabels, testfvecs = splitTrainAndTest(english, foreign)
+    project = readVectors(FLAGS.project)
 
     # Convert the array of float arrays into a numpy float matrix.
     project_np = np.matrix(project).astype(np.float32)
