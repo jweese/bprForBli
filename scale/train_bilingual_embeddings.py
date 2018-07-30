@@ -17,8 +17,6 @@ tf.app.flags.DEFINE_string('testoutput', None,
                            'File containing the test data (labels & features).')
 tf.app.flags.DEFINE_string('project', None,
                            'File containing the test data (labels & features).')
-tf.app.flags.DEFINE_string('towrite', None,
-                           'File containing the test data (labels & features).')
 tf.app.flags.DEFINE_integer('num_epochs', 1,
                             'Number of passes over the training data.')
 tf.app.flags.DEFINE_integer('num_hidden', 1,
@@ -105,7 +103,6 @@ def main(argv=None):
 
     # Get the size of layer one.
     num_hidden = FLAGS.num_hidden
-    towritefile = FLAGS.towrite
 
     # This is where training samples and labels are fed to the graph.
     # These placeholder nodes will be fed a batch of training data at each
@@ -249,7 +246,7 @@ def main(argv=None):
 	#weights_out = w_out.eval()
 	#bias_out = b_out.eval()
         #y_out = predicted_class.eval(feed_dict={x: project_data}) 
-	np.savetxt(towritefile,y_out_np,delimiter=" ")
+	np.savetxt(sys.stdout ,y_out_np,delimiter=" ")
 	#np.savetxt("bias_hidden.txt",bias_hidden,delimiter=" ")
 	#np.savetxt("weights_out.txt",weights_out,delimiter=" ")
 	#np.savetxt("bias_out.txt",bias_out,delimiter=" ")
