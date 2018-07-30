@@ -116,19 +116,16 @@ def main(argv=None):
     w_hidden_1 = init_weights([num_features_in, num_hidden_1],'xavier',xavier_params=(num_features_in, num_hidden_1))
     b_hidden_1 = init_weights([1,num_hidden_1],'zeros')
     hidden_1 = tf.nn.tanh(tf.matmul(x,w_hidden_1) + b_hidden_1)
-    #hidden_1 = tf.matmul(x,w_hidden_1) + b_hidden_1
     
     num_hidden_2 = num_features_in*10
     w_hidden_2 = init_weights([num_hidden_1, num_hidden_2],'xavier',xavier_params=(num_hidden_1, num_hidden_2))
     b_hidden_2 = init_weights([1,num_hidden_2],'zeros')
     hidden_2 = tf.nn.tanh(tf.matmul(hidden_1,w_hidden_2) + b_hidden_2)
-    #hidden_2 = tf.matmul(hidden_1,w_hidden_2) + b_hidden_2
 
     num_hidden_3 = num_features_in*10
     w_hidden_3 = init_weights([num_hidden_2, num_hidden_3],'xavier',xavier_params=(num_hidden_2, num_hidden_3))
     b_hidden_3 = init_weights([1,num_hidden_3],'zeros')
     hidden_3 = tf.nn.tanh(tf.matmul(hidden_2,w_hidden_3) + b_hidden_3)
-    #hidden_3 = tf.matmul(hidden_2,w_hidden_3) + b_hidden_3
 
     w_hidden_4 = init_weights([num_hidden_3, num_hidden],'xavier',xavier_params=(num_hidden_3, num_hidden))
     b_hidden_4 = init_weights([1,num_hidden],'zeros')
@@ -145,13 +142,9 @@ def main(argv=None):
 
     # The output layer.
     y = tf.matmul(hidden_4,w_out)+b_out
-    #print(y.shape)
-    #print(y_.shape)
-    #saver = tf.train.Saver()
 
     # Optimization.
     myloss = tf.reduce_mean(tf.square(y-y_))
-    #train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
     train_step = tf.train.AdamOptimizer(1e-5).minimize(myloss)
     
     # Evaluation.
@@ -163,7 +156,6 @@ def main(argv=None):
     # Create a local session to run this computation.
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
-    	#tf.global_variables_initializer().run()
 	tf.initialize_all_variables().run()
     	if verbose:
     	    print 'Initialized!'
@@ -174,18 +166,10 @@ def main(argv=None):
         lossprev = 0
         idx = 0
     	for step in xrange(num_epochs * train_size // BATCH_SIZE):
-    	    #if verbose:
-    	        #print step,
-    	        
     	    offset = (step * BATCH_SIZE) % train_size
     	    batch_data = train_data[offset:(offset + BATCH_SIZE), :]
-            #print(batch_data.shape)
     	    batch_labels = train_labels[:, offset:(offset + BATCH_SIZE)]
-            #print(batch_labels.shape)
     	    train_step.run(feed_dict={x: batch_data, y_: batch_labels.transpose()})
-            #print(sumaccuracy.eval(feed_dict={x: batch_data, y_: batch_labels.transpose()}))
-            #print(predicted_class.eval(feed_dict={x: batch_data, y_: batch_labels.transpose()}).shape)
-            #print(correct_prediction.eval(feed_dict={x: batch_data, y_: batch_labels.transpose()}).shape)
     	    if verbose and offset >= train_size-BATCH_SIZE:
 	        idx = idx + 1
 	        losscurr = accuracy.eval(feed_dict={x: test_data, y_: test_labels.transpose()})
@@ -199,12 +183,6 @@ def main(argv=None):
                      lossprev = losscurr
                      if diff < 0.0001:
                          break
-	    #	lossdiff = losscurr - lossprev
-	    #	if lossdiff < 0:
-	    #	    lossdiff = 0 - lossdiff
-	    #	print(lossdiff)
-	    #	lossprev = losscurr
-
 	offset = 0
 	batch_data = project_data[offset:(offset + BATCH_SIZE), :]
 	y_out_np = predicted_class.eval(feed_dict={x: batch_data})
@@ -224,32 +202,8 @@ def main(argv=None):
                     break
         sumacc = sumacc / project_size
         print(sumacc)
-    	#for step in xrange(project_size // BATCH_SIZE):
-	#    step = step + 1;
-        #    #print(step)
-	#    offset = (step * BATCH_SIZE) % project_size
-	#    batch_data = project_data[offset:(offset + BATCH_SIZE), :]
-	#    y_out=predicted_class.eval(feed_dict={x: batch_data})
-	#    y_out_np = np.concatenate((y_out_np,y_out), axis = 0)
-        #    sumacc = sumacc + sumaccuracy.eval(feed_dict={x: batch_data, y_:batch_data})
-	#    #y_out.append(predicted_class.eval(feed_dict={x: batch_data}))
-	#    if offset >= project_size-BATCH_SIZE:
-	#        break
-        #sumacc = sumacc / project_size
-        #print(sumacc)
-        #print(y_out_np.shape)	
-	#y_out_np = np.reshape(y_out, (-1,100))
-	#print(y_out_np.shape)
-    	#print "Accuracy:", accuracy.eval(feed_dict={x: train_data, y_: train_labels[:,:].transpose()})
-	#weights_hidden = w_hidden.eval()
-	#bias_hidden = b_hidden.eval()
-	#weights_out = w_out.eval()
-	#bias_out = b_out.eval()
-        #y_out = predicted_class.eval(feed_dict={x: project_data}) 
 	np.savetxt(sys.stdout ,y_out_np,delimiter=" ")
-	#np.savetxt("bias_hidden.txt",bias_hidden,delimiter=" ")
-	#np.savetxt("weights_out.txt",weights_out,delimiter=" ")
-	#np.savetxt("bias_out.txt",bias_out,delimiter=" ")
+
 
 if __name__ == '__main__':
     tf.app.run()
