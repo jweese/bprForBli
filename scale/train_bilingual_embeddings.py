@@ -25,18 +25,18 @@ tf.app.flags.DEFINE_string(
         'english--foreign word pairs',
         )
 tf.app.flags.DEFINE_string(
-        'project',
+        'to_project',
         None,
-        'foreign--english projection matrix',
+        'English vectors to project into foreign space',
         )
 tf.app.flags.DEFINE_integer(
         'num_epochs',
-        1,
+        100,
         'Number of passes over the training data.',
         )
 tf.app.flags.DEFINE_integer(
         'num_hidden',
-        1,
+        10000,
         'Number of nodes in the hidden layer.',
         )
 tf.app.flags.DEFINE_boolean(
@@ -88,7 +88,7 @@ def extract_data():
     fr = readVectors(FLAGS.foreign)
     corpus = getVectorPairs(en, fr, readWordPairs(FLAGS.dict))
     labels, fvecs, testlabels, testfvecs = splitTrainAndTest(corpus)
-    project = readVectorsInOrder(FLAGS.project)
+    project = readVectorsInOrder(FLAGS.to_project)
 
     # Convert the array of float arrays into a numpy float matrix.
     project_np = np.matrix(project).astype(np.float32)
