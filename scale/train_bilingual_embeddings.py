@@ -157,11 +157,6 @@ def main(argv=None):
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
 	tf.initialize_all_variables().run()
-    	if verbose:
-    	    print 'Initialized!'
-    	    print
-    	    print 'Training.'
-    	    
     	# Iterate and train.
         lossprev = 0
         idx = 0
@@ -173,7 +168,6 @@ def main(argv=None):
     	    if verbose and offset >= train_size-BATCH_SIZE:
 	        idx = idx + 1
 	        losscurr = accuracy.eval(feed_dict={x: test_data, y_: test_labels.transpose()})
-                print(idx,losscurr)
 		if lossprev == 0:
 		     lossprev = losscurr
                 if lossprev > losscurr:
@@ -191,8 +185,6 @@ def main(argv=None):
 	    totalstep = project_size // BATCH_SIZE
             for step in xrange(project_size // BATCH_SIZE):
                 step = step + 1;
-                print step
-	        print totalstep
                 offset = (step * BATCH_SIZE) % project_size
                 batch_data = project_data[offset:(offset + BATCH_SIZE), :]
                 y_out=predicted_class.eval(feed_dict={x: batch_data})
@@ -201,7 +193,6 @@ def main(argv=None):
                 if offset >= project_size-BATCH_SIZE:
                     break
         sumacc = sumacc / project_size
-        print(sumacc)
 	np.savetxt(sys.stdout ,y_out_np,delimiter=" ")
 
 
