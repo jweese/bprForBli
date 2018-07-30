@@ -19,6 +19,11 @@ tf.app.flags.DEFINE_string(
     'foreign language vectors (test and train)',
 )
 tf.app.flags.DEFINE_string(
+    'dict',
+    None,
+    'english--foreign word pairs',
+)
+tf.app.flags.DEFINE_string(
     'project',
     None,
     'foreign--english projection matrix',
@@ -41,18 +46,29 @@ tf.app.flags.DEFINE_boolean(
 FLAGS = tf.app.flags.FLAGS
 
 def readVectors(filename):
-    vectors = []
+    vectors = {}
     for line in file(filename):
 	row = line.split(" ")
-        vectors.append(map(float, row))
+        word = row.pop(0)
+        vectors[word] = map(float, row)
     return vectors
 
 
-def splitTrainAndTest(english, foreign):
-    assert(len(english) == len(foreign))
+def readVectorsInOrder(filename):
+    return [map(float, r.split(" ")[1:]) for r in file(filename)]
+
+
+def readWordPairs(dictfile):
+    return [line.split(" ") for line in file(dictfile)]
+
+
+def getVectorPairs(english, foreign, pairs):
+    return [(english[e], foreign[f]) for (e,f) in pairs]
+
+
+def splitTrainAndTest(corpus):
     testSize = 0.1
-    testLen = int(len(english) * testSize)
-    corpus = zip(english, foreign)
+    testLen = int(len(corpus) * testSize)
     random.shuffle(corpus)
     train = corpus[testLen:]
     test = corpus[:testLen]
@@ -67,10 +83,11 @@ def splitTrainAndTest(english, foreign):
 # Extract numpy representations of the labels and features given rows consisting of:
 #   label, feat_0, feat_1, ..., feat_n
 def extract_data():
-    english = readVectors(FLAGS.english)
-    foreign = readVectors(FLAGS.foreign)
-    labels, fvecs, testlabels, testfvecs = splitTrainAndTest(english, foreign)
-    project = readVectors(FLAGS.project)
+    en = readVectors(FLAGS.english)
+    fr = readVectors(FLAGS.foreign)
+    corpus = getVectorPairs(en, fr, readWordPairs(FLAGS.dict))
+    labels, fvecs, testlabels, testfvecs = splitTrainAndTest(corpus)
+    project = readVectorsInOrder(FLAGS.project)
 
     # Convert the array of float arrays into a numpy float matrix.
     project_np = np.matrix(project).astype(np.float32)
