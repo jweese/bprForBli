@@ -24,12 +24,10 @@ tf.app.flags.DEFINE_integer('num_hidden', 1,
 tf.app.flags.DEFINE_boolean('verbose', False, 'Produce verbose output.')
 FLAGS = tf.app.flags.FLAGS
 
-def readVectors(filename, hasWords=False):
+def readVectors(filename):
     vectors = []
     for line in file(filename):
 	row = line.split(" ")
-        if hasWords:
-            row.pop(0)
         vectors.append(map(float, row))
     return vectors
 
@@ -46,7 +44,7 @@ def extract_data():
     fvecs = readVectors(traininputfile)
     testlabels = readVectors(testoutputfile)
     testfvecs = readVectors(testinputfile)
-    project = readVectors(projectFile, hasWords=True)
+    project = readVectors(projectFile)
 
     # Convert the array of float arrays into a numpy float matrix.
     project_np = np.matrix(project).astype(np.float32)
