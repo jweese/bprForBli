@@ -1,0 +1,8 @@
+#!/bin/bash
+#$ -cwd
+#$ -l mem_free=10g
+#$ -l num_proc=16
+#$ -l h_rt=0:30:00
+#$ -S /bin/bash
+source activate bpr
+exec python scale/train_bilingual_embeddings.py "$@"
