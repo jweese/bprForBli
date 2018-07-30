@@ -24,6 +24,15 @@ tf.app.flags.DEFINE_integer('num_hidden', 1,
 tf.app.flags.DEFINE_boolean('verbose', False, 'Produce verbose output.')
 FLAGS = tf.app.flags.FLAGS
 
+def readVectors(filename, hasWords=False):
+    vectors = []
+    for line in file(filename):
+	row = line.split(" ")
+        if hasWords:
+            row.pop(0)
+        vectors.append(map(float, row))
+    return vectors
+
 # Extract numpy representations of the labels and features given rows consisting of:
 #   label, feat_0, feat_1, ..., feat_n
 def extract_data():
@@ -33,32 +42,11 @@ def extract_data():
     testoutputfile = FLAGS.testoutput
     projectfile = FLAGS.project
 
-    labels = []
-    fvecs = []
-    testlabels = []
-    testfvecs = []
-    project = []
-
-    for line in file(traininputfile):
-	row = line.split(" ")
-        fvecs.append([float(x) for x in row[0:]])
-
-    for line in file(trainoutputfile):
-        row = line.split(" ")
-        labels.append([float(x) for x in row[0:]])
-
-    for line in file(testinputfile):
-	row = line.split(" ")
-        testfvecs.append([float(x) for x in row[0:]])
-
-    for line in file(testoutputfile):
-        row = line.split(" ")
-        testlabels.append([float(x) for x in row[0:]])
-
-    for line in file(projectfile):
-	row = line.split(" ")
-        project.append([float(x) for x in row[1:]])
-
+    labels = readVectors(trainoutputfile)
+    fvecs = readVectors(traininputfile)
+    testlabels = readVectors(testoutputfile)
+    testfvecs = readVectors(testinputfile)
+    project = readVectors(projectFile, hasWords=True)
 
     # Convert the array of float arrays into a numpy float matrix.
     project_np = np.matrix(project).astype(np.float32)
