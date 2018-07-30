@@ -9,61 +9,61 @@ import tensorflow as tf
 BATCH_SIZE = 100  # The number of training examples to use per training step.
 
 tf.app.flags.DEFINE_string(
-    'english',
-    None,
-    'English language vectors (test and train)',
-)
+        'english',
+        None,
+        'English language vectors (test and train)',
+        )
 tf.app.flags.DEFINE_string(
-    'foreign',
-    None,
-    'foreign language vectors (test and train)',
-)
+        'foreign',
+        None,
+        'foreign language vectors (test and train)',
+        )
 tf.app.flags.DEFINE_string(
-    'dict',
-    None,
-    'english--foreign word pairs',
-)
+        'dict',
+        None,
+        'english--foreign word pairs',
+        )
 tf.app.flags.DEFINE_string(
-    'project',
-    None,
-    'foreign--english projection matrix',
-)
+        'project',
+        None,
+        'foreign--english projection matrix',
+        )
 tf.app.flags.DEFINE_integer(
-    'num_epochs',
-    1,
-    'Number of passes over the training data.',
-)
+        'num_epochs',
+        1,
+        'Number of passes over the training data.',
+        )
 tf.app.flags.DEFINE_integer(
-    'num_hidden',
-    1,
-    'Number of nodes in the hidden layer.',
-)
+        'num_hidden',
+        1,
+        'Number of nodes in the hidden layer.',
+        )
 tf.app.flags.DEFINE_boolean(
-    'verbose',
-    False,
-    'Produce verbose output.',
-)
+        'verbose',
+        False,
+        'Produce verbose output.',
+        )
 FLAGS = tf.app.flags.FLAGS
 
 def readVectors(filename):
     vectors = {}
-    for line in file(filename):
-	row = line.split(" ")
+    for line in open(filename):
+        row = line.split(" ")
         word = row.pop(0)
-        vectors[word] = map(float, row)
+        vectors[word] = [float(i) for i in row]
     return vectors
 
 
 def readVectorsInOrder(filename):
-    return [map(float, r.split(" ")[1:]) for r in file(filename)]
+    return [[float(i) for i in r.split(" ")[1:]] for r in open(filename)]
 
 
 def readWordPairs(dictfile):
-    return [line.split(" ") for line in file(dictfile)]
+    return [line.split(" ")[:2] for line in open(dictfile)]
 
 
 def getVectorPairs(english, foreign, pairs):
-    return [(english[e], foreign[f]) for (e,f) in pairs]
+    return [(english[e], foreign[f]) for [e,f] in pairs]
 
 
 def splitTrainAndTest(corpus):
@@ -73,14 +73,14 @@ def splitTrainAndTest(corpus):
     train = corpus[testLen:]
     test = corpus[:testLen]
     return (
-        [f for (e,f) in train],
-        [e for (e,f) in train],
-        [f for (e,f) in test],
-        [e for (e,f) in test],
-    )
+            [f for (e,f) in train],
+            [e for (e,f) in train],
+            [f for (e,f) in test],
+            [e for (e,f) in test],
+            )
 
 
-# Extract numpy representations of the labels and features given rows consisting of:
+    # Extract numpy representations of the labels and features given rows consisting of:
 #   label, feat_0, feat_1, ..., feat_n
 def extract_data():
     en = readVectors(FLAGS.english)
@@ -114,7 +114,7 @@ def init_weights(shape, init_method='xavier', xavier_params = (None, None)):
         low = -4*np.sqrt(6.0/(fan_in + fan_out)) # {sigmoid:4, tanh:1} 
         high = 4*np.sqrt(6.0/(fan_in + fan_out))
         return tf.Variable(tf.random_uniform(shape, minval=low, maxval=high, dtype=tf.float32))
-    
+
 def main(argv=None):
     # Be verbose?
     verbose = FLAGS.verbose
@@ -138,14 +138,14 @@ def main(argv=None):
     # training step using the {feed_dict} argument to the Run() call below.
     x = tf.placeholder("float", shape=[None, num_features_in])
     y_ = tf.placeholder("float", shape=[None, num_features_out])
-    
+
     # Define and initialize the network.
 
     num_hidden_1 = num_features_in*10
     w_hidden_1 = init_weights([num_features_in, num_hidden_1],'xavier',xavier_params=(num_features_in, num_hidden_1))
     b_hidden_1 = init_weights([1,num_hidden_1],'zeros')
     hidden_1 = tf.nn.tanh(tf.matmul(x,w_hidden_1) + b_hidden_1)
-    
+
     num_hidden_2 = num_features_in*10
     w_hidden_2 = init_weights([num_hidden_1, num_hidden_2],'xavier',xavier_params=(num_hidden_1, num_hidden_2))
     b_hidden_2 = init_weights([1,num_hidden_2],'zeros')
@@ -162,9 +162,9 @@ def main(argv=None):
 
     # Initialize the output weights and biases.
     w_out = init_weights(
-        [num_hidden,num_features_out],
-        'xavier',
-        xavier_params=(num_hidden,num_features_out))    
+            [num_hidden,num_features_out],
+            'xavier',
+            xavier_params=(num_hidden,num_features_out))    
     b_out = init_weights([1,num_features_out],'zeros')
     w_out = w_out / float(math.sqrt(num_hidden))
     b_out = b_out / float(math.sqrt(num_hidden))
@@ -175,7 +175,7 @@ def main(argv=None):
     # Optimization.
     myloss = tf.reduce_mean(tf.square(y-y_))
     train_step = tf.train.AdamOptimizer(1e-5).minimize(myloss)
-    
+
     # Evaluation.
     predicted_class = y
     correct_prediction = y_
@@ -185,34 +185,34 @@ def main(argv=None):
     # Create a local session to run this computation.
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
-	tf.initialize_all_variables().run()
-    	# Iterate and train.
+        tf.initialize_all_variables().run()
+        # Iterate and train.
         lossprev = 0
         idx = 0
-    	for step in xrange(num_epochs * train_size // BATCH_SIZE):
-    	    offset = (step * BATCH_SIZE) % train_size
-    	    batch_data = train_data[offset:(offset + BATCH_SIZE), :]
-    	    batch_labels = train_labels[:, offset:(offset + BATCH_SIZE)]
-    	    train_step.run(feed_dict={x: batch_data, y_: batch_labels.transpose()})
-    	    if verbose and offset >= train_size-BATCH_SIZE:
-	        idx = idx + 1
-	        losscurr = accuracy.eval(feed_dict={x: test_data, y_: test_labels.transpose()})
-		if lossprev == 0:
-		     lossprev = losscurr
+        for step in range(num_epochs * train_size // BATCH_SIZE):
+            offset = (step * BATCH_SIZE) % train_size
+            batch_data = train_data[offset:(offset + BATCH_SIZE), :]
+            batch_labels = train_labels[:, offset:(offset + BATCH_SIZE)]
+            train_step.run(feed_dict={x: batch_data, y_: batch_labels.transpose()})
+            if verbose and offset >= train_size-BATCH_SIZE:
+                idx = idx + 1
+                losscurr = accuracy.eval(feed_dict={x: test_data, y_: test_labels.transpose()})
+                if lossprev == 0:
+                    lossprev = losscurr
                 if lossprev > losscurr:
-		     lossprev = losscurr
+                    lossprev = losscurr
                 if lossprev < losscurr:
-		     diff = losscurr - lossprev
-                     lossprev = losscurr
-                     if diff < 0.0001:
-                         break
-	offset = 0
-	batch_data = project_data[offset:(offset + BATCH_SIZE), :]
-	y_out_np = predicted_class.eval(feed_dict={x: batch_data})
-	sumacc = sumaccuracy.eval(feed_dict={x: batch_data, y_:batch_data})
+                    diff = losscurr - lossprev
+                    lossprev = losscurr
+                    if diff < 0.0001:
+                        break
+        offset = 0
+        batch_data = project_data[offset:(offset + BATCH_SIZE), :]
+        y_out_np = predicted_class.eval(feed_dict={x: batch_data})
+        sumacc = sumaccuracy.eval(feed_dict={x: batch_data, y_:batch_data})
         if project_size > BATCH_SIZE:
-	    totalstep = project_size // BATCH_SIZE
-            for step in xrange(project_size // BATCH_SIZE):
+            totalstep = project_size // BATCH_SIZE
+            for step in range(project_size // BATCH_SIZE):
                 step = step + 1;
                 offset = (step * BATCH_SIZE) % project_size
                 batch_data = project_data[offset:(offset + BATCH_SIZE), :]
@@ -222,7 +222,7 @@ def main(argv=None):
                 if offset >= project_size-BATCH_SIZE:
                     break
         sumacc = sumacc / project_size
-	np.savetxt(sys.stdout ,y_out_np,delimiter=" ")
+        np.savetxt(sys.stdout ,y_out_np,delimiter=" ")
 
 
 if __name__ == '__main__':
