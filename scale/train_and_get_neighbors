@@ -15,7 +15,7 @@ vecname=vecs
 src=$1
 tgt=$2
 dict=$3
-wordlist=$4
+wordlist=${4:-}
 
 python "$code"/train_bilingual_embeddings.py \
   --english "$tgt" \
@@ -31,4 +31,6 @@ for v in "${vecs[@]}"; do
     -i "$v" -o "${v/%txt/magnitude}"
 done
 
-exec python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" <"$wordlist"
+if [[ -n "$wordlist" ]]; then
+  exec python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" <"$wordlist"
+fi
