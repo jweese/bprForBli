@@ -44,6 +44,11 @@ tf.app.flags.DEFINE_boolean(
         False,
         'Produce verbose output.',
         )
+tf.app.flags.DEFINE_string(
+        'gentestfile',
+        None,
+        'where to save test set word pairs',
+        )
 FLAGS = tf.app.flags.FLAGS
 
 def readVectors(filename):
@@ -73,6 +78,10 @@ def splitTrainAndTest(corpus):
     random.shuffle(corpus)
     train = corpus[testLen:]
     test = corpus[:testLen]
+    if FLAGS.gentestfile is not None:
+        with open(FLAGS.gentestfile, 'w') as testfile:
+            for (e,f) in test:
+                testfile.write('{}\t{}\n'.format(f, e))
     return (
             [f for (e,f) in train],
             [e for (e,f) in train],

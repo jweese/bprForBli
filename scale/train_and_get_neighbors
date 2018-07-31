@@ -6,8 +6,9 @@
 #$ -S /bin/bash
 source activate bpr
 
-set -x
 set -u
+set -e
+set -x
 
 code=/home/hltcoe/jweese/src/bprForBli/scale
 vecname=vecs
@@ -22,6 +23,7 @@ python "$code"/train_bilingual_embeddings.py \
   --foreign "$src" \
   --dict "$dict" \
   --to_project "$tgt" \
+  --gentestfile testset \
   | paste -d' ' <(cut -d' ' -f1 "$tgt") - >"$vecname".tgt.txt
 ln -s "$src" "$vecname".src.txt
 
