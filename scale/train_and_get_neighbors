@@ -16,7 +16,8 @@ vecname=vecs
 src=$1
 tgt=$2
 dict=$3
-wordlist=${4:-}
+
+topN=10
 
 python "$code"/train_bilingual_embeddings.py \
   --english "$tgt" \
@@ -25,7 +26,7 @@ python "$code"/train_bilingual_embeddings.py \
   --to_project "$tgt" \
   --gentestfile testset \
   | paste -d' ' <(cut -d' ' -f1 "$tgt") - >"$vecname".tgt.txt
-ln -s "$src" "$vecname".src.txt
+ln -sf "$src" "$vecname".src.txt
 
 vecs=("$vecname".{src,tgt}.txt)
 for v in "${vecs[@]}"; do
@@ -33,6 +34,5 @@ for v in "${vecs[@]}"; do
     -i "$v" -o "${v/%txt/magnitude}"
 done
 
-if [[ -n "$wordlist" ]]; then
-  exec python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" <"$wordlist"
-fi
+python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" -n "$topN" \
+  < <(cut -f1 testset) >test.out
