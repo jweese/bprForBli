@@ -34,5 +34,7 @@ for v in "${vecs[@]}"; do
     -i "$v" -o "${v/%txt/magnitude}"
 done
 
-python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" -n "$topN" \
+TMPDIR=/scratch python "$code"/get_neighbors.py \
+  "${vecs[@]/%txt/magnitude}" -n "$topN" \
   < <(cut -f1 testset) >test.out
+exec "$code"/accuracy.pl testset test.out >result
