@@ -1,0 +1,34 @@
+#!/bin/bash
+#$ -cwd
+#$ -l mem_free=10g
+#$ -l num_proc=16
+#$ -l h_rt=0:40:00
+#$ -S /bin/bash
+source activate bpr
+
+set -x
+set -u
+
+code=/home/hltcoe/jweese/src/bprForBli/scale
+vecname=vecs
+
+src=$1
+tgt=$2
+dict=$3
+wordlist=$4
+
+python "$code"/train_bilingual_embeddings.py \
+  --english "$tgt" \
+  --foreign "$src" \
+  --dict "$dict" \
+  --to_project "$tgt" \
+  | paste -d' ' <(cut -d' ' -f1 "$tgt") - >"$vecname".tgt.txt
+ln -s "$src" "$vecname".src.txt
+
+vecs=("$vecname".{src,tgt}.txt)
+for v in "${vecs[@]}"; do
+  TMPDIR=/scratch python -m pymagnitude.converter \
+    -i "$v" -o "${v/%txt/magnitude}"
+done
+
+exec python "$code"/get_neighbors.py "${vecs[@]/%txt/magnitude}" <"$wordlist"
