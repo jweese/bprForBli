@@ -54,7 +54,7 @@ FLAGS = tf.app.flags.FLAGS
 def readVectors(filename):
     vectors = {}
     for line in open(filename):
-        row = line.split(" ")
+        row = line.strip().split(" ")
         word = row.pop(0)
         vectors[word] = [float(i) for i in row]
     return vectors
