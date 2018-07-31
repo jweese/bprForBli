@@ -78,16 +78,25 @@ def splitTrainAndTest(corpus):
     random.shuffle(corpus)
     train = corpus[testLen:]
     test = corpus[:testLen]
+    return train, test
+
+
+def getDataVectors(english, foreign, train, test):
+    trainVecs = getVectorPairs(english, foreign, train)
+    testVecs = getVectorPairs(english, foreign, test)
+    return (
+            [f for (e,f) in trainVecs],
+            [e for (e,f) in trainVecs],
+            [f for (e,f) in testVecs],
+            [e for (e,f) in testVecs],
+            )
+
+
+def writeTestSet(pairs):
     if FLAGS.gentestfile is not None:
         with open(FLAGS.gentestfile, 'w') as testfile:
-            for (e,f) in test:
+            for (e,f) in pairs:
                 testfile.write('{}\t{}\n'.format(f, e))
-    return (
-            [f for (e,f) in train],
-            [e for (e,f) in train],
-            [f for (e,f) in test],
-            [e for (e,f) in test],
-            )
 
 
     # Extract numpy representations of the labels and features given rows consisting of:
@@ -95,8 +104,15 @@ def splitTrainAndTest(corpus):
 def extract_data():
     en = readVectors(FLAGS.english)
     fr = readVectors(FLAGS.foreign)
-    corpus = getVectorPairs(en, fr, readWordPairs(FLAGS.dict))
-    labels, fvecs, testlabels, testfvecs = splitTrainAndTest(corpus)
+    pairs = readWordPairs(FLAGS.dict)
+    trainpairs, testpairs = splitTrainAndTest(pairs)
+    writeTestSet(testpairs)
+    labels, fvecs, testlabels, testfvecs = getDataVectors(
+        en,
+        fr,
+        trainpairs,
+        testpairs,
+    )
     project = readVectorsInOrder(FLAGS.to_project)
 
     # Convert the array of float arrays into a numpy float matrix.
