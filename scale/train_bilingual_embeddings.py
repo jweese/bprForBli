@@ -61,7 +61,10 @@ def readVectors(filename):
 
 
 def readVectorsInOrder(filename):
-    return [[float(i) for i in r.split()[1:]] for r in open(filename)]
+    data = [[float(i) for i in r.split()[1:]] for r in open(filename)]
+    if data and len(data[0]) == 1:  # header
+        data.pop(0)
+    return data
 
 
 def readWordPairs(dictfile):
@@ -69,7 +72,11 @@ def readWordPairs(dictfile):
 
 
 def getVectorPairs(english, foreign, pairs):
-    return [(english[e], foreign[f]) for [e,f] in pairs]
+    result = []
+    for [e,f] in pairs:
+        if e in english and f in foreign:
+            result.append((english[e], foreign[f]))
+    return result
 
 
 def splitTrainAndTest(corpus):
