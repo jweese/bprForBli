@@ -54,18 +54,18 @@ FLAGS = tf.app.flags.FLAGS
 def readVectors(filename):
     vectors = {}
     for line in open(filename):
-        row = line.strip().split(" ")
+        row = line.strip().split()
         word = row.pop(0)
         vectors[word] = [float(i) for i in row]
     return vectors
 
 
 def readVectorsInOrder(filename):
-    return [[float(i) for i in r.split(" ")[1:]] for r in open(filename)]
+    return [[float(i) for i in r.split()[1:]] for r in open(filename)]
 
 
 def readWordPairs(dictfile):
-    return [line.split(" ")[:2] for line in open(dictfile)]
+    return [line.split()[:2] for line in open(dictfile)]
 
 
 def getVectorPairs(english, foreign, pairs):
