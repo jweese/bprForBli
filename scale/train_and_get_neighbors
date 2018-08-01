@@ -23,15 +23,30 @@ get_vector_words() {
   awk 'NF > 2 { print $1; }' "$@"
 }
 
+has_dimensions() {
+  awk 'NR == 1 { if (NF == 2) { exit 0; } else { exit 1; }}' "$@"
+}
+
+cut_multitoken_words() {
+  if has_dimensions "$1"; then
+    python "$code"/cut_multitoken_words.py <"$1" >"$2"
+  else
+    ln -sf "$1" "$2"
+  fi
+}
+
+cut_multitoken_words "$src" src.in
+cut_multitoken_words "$tgt" tgt.in
+
 python "$code"/train_bilingual_embeddings.py \
-  --english "$tgt" \
-  --foreign "$src" \
+  --english tgt.in \
+  --foreign src.in \
   --dict "$dict" \
-  --to_project "$tgt" \
+  --to_project tgt.in \
   --gentestfile testset \
   --verbose \
-  | paste -d' ' <(get_vector_words "$tgt") - >"$vecname".tgt.txt
-ln -sf "$src" "$vecname".src.txt
+  | paste -d' ' <(get_vector_words tgt.in) - >"$vecname".tgt.txt
+ln -sf src.in "$vecname".src.txt
 
 vecs=("$vecname".{src,tgt}.txt)
 for v in "${vecs[@]}"; do
