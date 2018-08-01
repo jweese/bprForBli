@@ -230,6 +230,7 @@ def main(argv=None):
             if verbose and offset >= train_size-BATCH_SIZE:
                 idx = idx + 1
                 losscurr = accuracy.eval(feed_dict={x: test_data, y_: test_labels.transpose()})
+                sys.stderr.write('{}\t{}\n'.format(idx, losscurr))
                 if lossprev == 0:
                     lossprev = losscurr
                 if lossprev > losscurr:
