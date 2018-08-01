@@ -25,6 +25,7 @@ python "$code"/train_bilingual_embeddings.py \
   --dict "$dict" \
   --to_project "$tgt" \
   --gentestfile testset \
+  --verbose \
   | paste -d' ' <(cut -d' ' -f1 "$tgt") - >"$vecname".tgt.txt
 ln -sf "$src" "$vecname".src.txt
 
