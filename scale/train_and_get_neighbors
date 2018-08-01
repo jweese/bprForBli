@@ -19,6 +19,10 @@ dict=$3
 
 topN=10
 
+get_vector_words() {
+  awk 'NF > 2 { print $1; }' "$@"
+}
+
 python "$code"/train_bilingual_embeddings.py \
   --english "$tgt" \
   --foreign "$src" \
@@ -26,7 +30,7 @@ python "$code"/train_bilingual_embeddings.py \
   --to_project "$tgt" \
   --gentestfile testset \
   --verbose \
-  | paste -d' ' <(cut -d' ' -f1 "$tgt") - >"$vecname".tgt.txt
+  | paste -d' ' <(get_vector_words "$tgt") - >"$vecname".tgt.txt
 ln -sf "$src" "$vecname".src.txt
 
 vecs=("$vecname".{src,tgt}.txt)
