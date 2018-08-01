@@ -72,11 +72,11 @@ def readWordPairs(dictfile):
 
 
 def getVectorPairs(english, foreign, pairs):
-    result = []
-    for [e,f] in pairs:
-        if e in english and f in foreign:
-            result.append((english[e], foreign[f]))
-    return result
+    return [
+        (english[e], foreign[f])
+        for [e,f] in pairs
+        if e in english and f in foreign
+    ]
 
 
 def splitTrainAndTest(corpus):
