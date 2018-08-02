@@ -74,7 +74,7 @@ def readWordPairs(dictfile):
 def getVectorPairs(english, foreign, pairs):
     return [
         (english[e], foreign[f])
-        for [e,f] in pairs
+        for [f,e] in pairs
         if e in english and f in foreign
     ]
 

@@ -11,11 +11,12 @@ set -e
 set -x
 
 code=/home/hltcoe/jweese/src/bprForBli/scale
-vecname=vecs
 
 src=$1
 tgt=$2
 dict=$3
+prefix=${4:-}
+[[ -n "$prefix" ]] && prefix="${prefix}."
 
 topN=10
 
@@ -35,18 +36,23 @@ cut_multitoken_words() {
   fi
 }
 
-cut_multitoken_words "$src" src.in
-cut_multitoken_words "$tgt" tgt.in
+vecname="$prefix"vecs
+srcin="$prefix"src.in
+tgtin="$prefix"tgt.in
+testset="$prefix"testset
+
+cut_multitoken_words "$src" "$srcin"
+cut_multitoken_words "$tgt" "$tgtin"
 
 python "$code"/train_bilingual_embeddings.py \
-  --english tgt.in \
-  --foreign src.in \
+  --english "$tgtin" \
+  --foreign "$srcin" \
   --dict "$dict" \
-  --to_project tgt.in \
-  --gentestfile testset \
+  --to_project "$tgtin" \
+  --gentestfile "$testset" \
   --verbose \
-  | paste -d' ' <(get_vector_words tgt.in) - >"$vecname".tgt.txt
-ln -sf src.in "$vecname".src.txt
+  | paste -d' ' <(get_vector_words "$tgtin") - >"$vecname".tgt.txt
+ln -sf "$srcin" "$vecname".src.txt
 
 vecs=("$vecname".{src,tgt}.txt)
 for v in "${vecs[@]}"; do
@@ -56,5 +62,5 @@ done
 
 TMPDIR=/scratch python "$code"/get_neighbors.py \
   "${vecs[@]/%txt/magnitude}" -n "$topN" \
-  < <(cut -f1 testset) >test.out
-exec "$code"/accuracy.pl testset test.out >result
+  < <(cut -f1 "$testset") >"$prefix"test.out
+exec "$code"/accuracy.pl "$testset" "$prefix"test.out >"$prefix"result
