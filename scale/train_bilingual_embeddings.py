@@ -219,6 +219,9 @@ def main(argv=None):
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
         tf.initialize_all_variables().run()
+        if verbose:
+            sys.stderr.write('Initialized!\n\nTraining.\n')
+
         # Iterate and train.
         lossprev = 0
         idx = 0
@@ -248,6 +251,7 @@ def main(argv=None):
             totalstep = project_size // BATCH_SIZE
             for step in range(project_size // BATCH_SIZE):
                 step = step + 1;
+                sys.stderr.write('{}\n{}\n'.format(step, totalstep))
                 offset = (step * BATCH_SIZE) % project_size
                 batch_data = project_data[offset:(offset + BATCH_SIZE), :]
                 y_out=predicted_class.eval(feed_dict={x: batch_data})
