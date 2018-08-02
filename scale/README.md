@@ -24,3 +24,11 @@ This will generate (by default)
 * `testset` with tab-separated word pairs
 * `test.out` with the k nearest neighbors for the test set
 * `result` which is `testset` annotated with 1/0 for matching, plus overall accuracy at the bottom
+
+## re-evaluating a test set
+
+Fix up the `$code` variable like before in the script
+```
+scale/evaluate_test_set <test set> <foreign vectors> <english vectors>
+```
+The results (same format as main script result file) go to stdout.

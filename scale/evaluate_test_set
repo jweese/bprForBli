@@ -1,0 +1,11 @@
+#!/bin/bash
+
+testset=$1
+shift
+
+code=/home/hltcoe/jweese/src/bprForBli/scale
+topN=10
+
+TMPDIR=/scratch python "$code"/get_neighbors.py "$@" -n "$topN" \
+  < <(cut -f1 "$testset") \
+  | "$code"/accuracy.pl "$testset" -
