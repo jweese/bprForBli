@@ -102,7 +102,7 @@ def getDataVectors(english, foreign, train, test):
 def writeTestSet(pairs):
     if FLAGS.gentestfile is not None:
         with open(FLAGS.gentestfile, 'w') as testfile:
-            for (e,f) in pairs:
+            for (f,e) in pairs:
                 testfile.write('{}\t{}\n'.format(f, e))
 
 
