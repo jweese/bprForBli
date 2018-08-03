@@ -15,8 +15,9 @@ code=/home/hltcoe/jweese/src/bprForBli/scale
 src=$1
 tgt=$2
 dict=$3
-prefix=${4:-}
-[[ -n "$prefix" ]] && prefix="${prefix}."
+prefix="${4}."
+shift 4;
+extra_test_sets=("$@")
 
 topN=10
 
@@ -63,4 +64,7 @@ done
 TMPDIR=/scratch python "$code"/get_neighbors.py \
   "${vecs[@]/%txt/magnitude}" -n "$topN" \
   < <(cut -f1 "$testset") >"$prefix"test.out
-exec "$code"/accuracy.pl "$testset" "$prefix"test.out >"$prefix"result
+exec "$code"/accuracy.pl \
+  "$testset" \
+  "${extra_test_sets[@]}" \
+  "$prefix"test.out >"$prefix"result
